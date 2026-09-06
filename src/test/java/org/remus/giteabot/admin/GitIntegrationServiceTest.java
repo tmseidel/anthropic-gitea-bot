@@ -182,6 +182,46 @@ class GitIntegrationServiceTest {
     }
 
     @Test
+    void save_changedSshEndpoint_requiresNewTrustAndKeepsPrivateKey() {
+        GitIntegration existing = new GitIntegration();
+        existing.setId(7L);
+        existing.setUrl("https://old.example.com");
+        existing.setTransport(GitTransport.SSH);
+        existing.setToken("stored-token");
+        existing.setSshPrivateKey("stored-encrypted-key");
+        existing.setSshKnownHosts("old-host-key");
+        GitIntegration input = new GitIntegration();
+        input.setId(7L);
+        input.setUrl("https://new.example.com");
+        input.setTransport(GitTransport.SSH);
+        when(gitIntegrationRepository.findById(7L)).thenReturn(Optional.of(existing));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> gitIntegrationService.save(input, false, false));
+        input.setToken("new-token");
+        when(encryptionService.isEncryptionEnabled()).thenReturn(true);
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> gitIntegrationService.save(input, false, false));
+        assertTrue(error.getMessage().contains("known_hosts"));
+        assertEquals("https://old.example.com", existing.getUrl());
+        assertEquals(GitTransport.SSH, existing.getTransport());
+        assertEquals("stored-encrypted-key", existing.getSshPrivateKey());
+        assertEquals("old-host-key", existing.getSshKnownHosts());
+        verify(gitIntegrationRepository, never()).save(any());
+
+        input.setSshKnownHosts("new.example.com ssh-ed25519 verified-key");
+        when(encryptionService.encrypt("new-token")).thenReturn("encrypted-new-token");
+        when(gitIntegrationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        GitIntegration result = gitIntegrationService.save(input, false, false);
+
+        assertEquals(GitTransport.SSH, result.getTransport());
+        assertEquals("https://new.example.com", result.getUrl());
+        assertEquals("stored-encrypted-key", result.getSshPrivateKey());
+        assertEquals(input.getSshKnownHosts(), result.getSshKnownHosts());
+        verify(encryptionService, never()).encrypt("stored-encrypted-key");
+    }
+
+    @Test
     void save_changedEndpointRequiresNewToken() {
         GitIntegration integration = new GitIntegration();
         integration.setId(7L);

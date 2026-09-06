@@ -209,7 +209,7 @@
                 knownHostsInput.disabled = !visible;
                 privateKeyInput.required = visible && (!isEditMode || !hasStoredSshPrivateKey || clearPending);
                 knownHostsInput.required = visible
-                    && (!isEditMode || !hasStoredSshKnownHosts || clearPending || replacingPrivateKey);
+                    && (!isEditMode || !hasStoredSshKnownHosts || clearPending || replacingPrivateKey || endpointChanged);
                 document.getElementById('token').required = !isEditMode
                     || endpointChanged || visible && (!hasStoredToken || tokenClearPending);
             }
@@ -312,8 +312,6 @@
                 const clearSshInput = document.getElementById('clearSshCredentials');
                 const sshKeepHint = document.getElementById('sshCredentialsKeepHint');
                 const sshClearPendingHint = document.getElementById('sshCredentialsClearPendingHint');
-                let endpointEditClearedSsh = false;
-                let explicitSshClear = false;
 
                 function setClearPending(pending) {
                     clearTokenInput.value = pending ? 'true' : 'false';
@@ -336,35 +334,14 @@
                     updateSshFields();
                 }
 
-                function switchToHttpAndClearSsh(endpointEdit = false) {
+                function switchToHttpAndClearSsh() {
                     const changedTransport = transportInput.value === 'SSH';
                     if (changedTransport) {
                         privateKeyInput.value = '';
                         knownHostsInput.value = '';
                         transportInput.value = 'HTTP';
                     }
-                    if (endpointEdit && !explicitSshClear
-                            && (changedTransport || originalTransport === 'SSH')) {
-                        endpointEditClearedSsh = true;
-                    } else if (!endpointEdit) {
-                        explicitSshClear = true;
-                        endpointEditClearedSsh = false;
-                    }
                     setSshClearPending(true);
-                }
-
-                function reconcileEndpointEdit() {
-                    const endpointChanged = isEditMode
-                        && (document.getElementById('providerType').value !== originalProviderType
-                            || urlInput.value !== originalUrl);
-                    const storedSshCredentials = originalTransport === 'SSH' && hasStoredSshPrivateKey;
-                    if (endpointChanged && storedSshCredentials) {
-                        switchToHttpAndClearSsh(true);
-                    } else if (endpointEditClearedSsh) {
-                        transportInput.value = originalTransport;
-                        setSshClearPending(false);
-                        endpointEditClearedSsh = false;
-                    }
                 }
 
                 // An empty token field means "keep", so removal needs an explicit marker.
@@ -373,7 +350,6 @@
                     clearTokenBtn.addEventListener('click', function() {
                         tokenInput.value = '';
                         setClearPending(true);
-                        switchToHttpAndClearSsh();
                     });
                 }
 
@@ -383,7 +359,6 @@
                     if (tokenInput.value.trim() !== '') {
                         setClearPending(false);
                     }
-                    reconcileEndpointEdit();
                 });
 
                 const clearSshCredentialsBtn = document.getElementById('clearSshCredentialsBtn');
@@ -394,22 +369,15 @@
                 }
 
                 urlInput.addEventListener('input', function() {
-                    reconcileEndpointEdit();
                     updateSshFields();
                 });
-
-                document.getElementById('providerType').addEventListener('change', reconcileEndpointEdit);
 
                 transportInput.addEventListener('change', function() {
                     if (isEditMode && originalTransport === 'SSH') {
                         if (transportInput.value === 'HTTP') {
-                            explicitSshClear = true;
-                            endpointEditClearedSsh = false;
                             setSshClearPending(true);
                         } else {
-                            explicitSshClear = false;
                             setSshClearPending(false);
-                            reconcileEndpointEdit();
                         }
                     }
                 });
@@ -417,8 +385,6 @@
                 [privateKeyInput, knownHostsInput].forEach(function(input) {
                     input.addEventListener('input', function() {
                         if (input.value.trim() !== '') {
-                            explicitSshClear = false;
-                            endpointEditClearedSsh = false;
                             setSshClearPending(false);
                         }
                     });

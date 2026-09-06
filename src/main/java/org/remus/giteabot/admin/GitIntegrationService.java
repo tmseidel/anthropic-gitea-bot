@@ -147,6 +147,9 @@ public class GitIntegrationService {
         if (integration.getProviderType() != RepositoryType.GITEA) {
             throw new IllegalArgumentException("SSH transport is currently supported for Gitea integrations only");
         }
+        if (endpointChanged && !hasNewKnownHosts) {
+            throw new IllegalArgumentException("New verified known_hosts are required when changing the SSH endpoint");
+        }
         if (hasNewPrivateKey && !hasNewKnownHosts) {
             throw new IllegalArgumentException("SSH private key and known_hosts are required for SSH transport");
         }
