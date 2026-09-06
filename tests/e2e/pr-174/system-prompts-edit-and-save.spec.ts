@@ -22,11 +22,14 @@ test('User can edit a prompt inside an accordion section and save successfully',
   const marker = `\n<!-- e2e-marker-${Date.now()} -->`;
   await textarea.fill(original + marker);
 
-  // Submit the form containing this textarea
-  await textarea.evaluate((el: HTMLTextAreaElement) => el.form?.requestSubmit());
+  const saveButton = page.getByRole('button', { name: 'Save' });
 
-  // Wait for navigation / save to settle
-  await page.waitForLoadState('networkidle').catch(() => {});
+  // Submit the form and wait for the redirect back to the settings list, so the
+  // save is guaranteed to have completed before we reload the edit page.
+  await Promise.all([
+    page.waitForURL((url) => url.pathname === '/system-settings'),
+    saveButton.click(),
+  ]);
 
   // Navigate back to the edit page
   await page.goto('/system-settings/system-prompts/1/edit');
@@ -43,8 +46,8 @@ test('User can edit a prompt inside an accordion section and save successfully',
 
   // Cleanup: restore the original value to keep the test idempotent
   await page.locator('#reviewSystemPrompt').fill(original);
-  await page
-    .locator('#reviewSystemPrompt')
-    .evaluate((el: HTMLTextAreaElement) => el.form?.requestSubmit());
-  await page.waitForLoadState('networkidle').catch(() => {});
+  await Promise.all([
+    page.waitForURL((url) => url.pathname === '/system-settings'),
+    saveButton.click(),
+  ]);
 });
