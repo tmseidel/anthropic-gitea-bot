@@ -23,7 +23,11 @@ import java.util.Map;
  */
 public interface RepositoryApiClient {
 
-    /** Returns the credentials used by this client (base URL, clone URL, username, token). */
+    /**
+     * Returns the credentials used by this client: API base URL, credential-free
+     * HTTP clone base URL, username, and token, plus the selected Git transport
+     * and its SSH material (private key, {@code known_hosts}) when SSH is active.
+     */
     RepositoryCredentials getCredentials();
 
     /** Returns the API base URL of the repository provider (e.g. {@code https://api.github.com}). */
@@ -31,7 +35,12 @@ public interface RepositoryApiClient {
         return getCredentials().baseUrl();
     }
 
-    /** Returns the credential-free HTTP clone base URL (e.g. {@code https://github.com}). */
+    /**
+     * Returns the credential-free HTTP clone base URL (e.g. {@code https://github.com}).
+     * This is the HTTP-transport base only; the actual Git remote for clone, fetch,
+     * and push operations is resolved per repository by {@link #getRepositoryRemote},
+     * which providers may override to select SSH.
+     */
     default String getCloneUrl() {
         return getCredentials().cloneUrl();
     }
