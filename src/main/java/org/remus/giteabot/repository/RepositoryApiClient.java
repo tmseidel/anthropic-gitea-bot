@@ -37,7 +37,8 @@ public interface RepositoryApiClient {
     }
 
     /**
-     * Resolves the complete, credential-free HTTP Git remote for one repository.
+     * Resolves the complete, credential-free Git remote for one repository.
+     * Providers may override this to select a repository-specific transport.
      */
     default String getRepositoryRemote(String owner, String repo) {
         String cloneBaseUrl = getCloneUrl();
