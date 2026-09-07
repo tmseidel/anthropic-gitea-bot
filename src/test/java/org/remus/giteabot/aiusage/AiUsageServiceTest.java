@@ -218,4 +218,40 @@ class AiUsageServiceTest {
         assertEquals(Sort.Direction.ASC, order.getDirection());
         assertEquals(2, captor.getValue().getPageNumber());
     }
+
+    @Test
+    void findUsage_clampsOversizedPageSizeToMax() {
+        Page<AiUsageLog> page = new PageImpl<>(List.of());
+        ArgumentCaptor<PageRequest> captor = ArgumentCaptor.forClass(PageRequest.class);
+        when(usageRepository.findByTimestampBetween(any(), any(), captor.capture()))
+                .thenReturn(page);
+
+        service.findUsage(null, null, 0, 1_000_000, "timestamp", false);
+
+        assertEquals(AiUsageService.MAX_PAGE_SIZE, captor.getValue().getPageSize());
+    }
+
+    @Test
+    void findErrors_clampsJustAboveMaxPageSize() {
+        Page<AiErrorLog> page = new PageImpl<>(List.of());
+        ArgumentCaptor<PageRequest> captor = ArgumentCaptor.forClass(PageRequest.class);
+        when(errorRepository.findByTimestampBetween(any(), any(), captor.capture()))
+                .thenReturn(page);
+
+        service.findErrors(null, null, 0, AiUsageService.MAX_PAGE_SIZE + 1, "timestamp", false);
+
+        assertEquals(AiUsageService.MAX_PAGE_SIZE, captor.getValue().getPageSize());
+    }
+
+    @Test
+    void findUsage_keepsPageSizeAtMaxBoundary() {
+        Page<AiUsageLog> page = new PageImpl<>(List.of());
+        ArgumentCaptor<PageRequest> captor = ArgumentCaptor.forClass(PageRequest.class);
+        when(usageRepository.findByTimestampBetween(any(), any(), captor.capture()))
+                .thenReturn(page);
+
+        service.findUsage(null, null, 0, AiUsageService.MAX_PAGE_SIZE, "timestamp", false);
+
+        assertEquals(AiUsageService.MAX_PAGE_SIZE, captor.getValue().getPageSize());
+    }
 }
