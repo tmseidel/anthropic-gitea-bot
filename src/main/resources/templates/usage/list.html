@@ -197,7 +197,7 @@
                                         <form class="d-flex align-items-center gap-1" method="get" th:action="@{/usage}">
                                             <input type="hidden" name="from" th:value="${from}"/>
                                             <input type="hidden" name="to" th:value="${to}"/>
-                                            <input type="hidden" name="usagePage" th:value="${usagePage.number + 1}"/>
+                                            <input type="hidden" name="usagePage" th:value="1"/>
                                             <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                             <input type="hidden" name="usageDir" th:value="${usageDir}"/>
                                             <input type="hidden" name="errorPage" th:value="${errorPage.number + 1}"/>
@@ -219,7 +219,7 @@
                                 <form class="d-flex align-items-center gap-1" method="get" th:action="@{/usage}">
                                     <input type="hidden" name="from" th:value="${from}"/>
                                     <input type="hidden" name="to" th:value="${to}"/>
-                                    <input type="hidden" name="usagePage" th:value="${usagePage.number + 1}"/>
+                                    <input type="hidden" name="usagePage" th:value="1"/>
                                     <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                     <input type="hidden" name="usageDir" th:value="${usageDir}"/>
                                     <input type="hidden" name="errorPage" th:value="${errorPage.number + 1}"/>
@@ -366,7 +366,7 @@
                                             <input type="hidden" name="usageSize" th:value="${usageSize}"/>
                                             <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                             <input type="hidden" name="usageDir" th:value="${usageDir}"/>
-                                            <input type="hidden" name="errorPage" th:value="${errorPage.number + 1}"/>
+                                            <input type="hidden" name="errorPage" th:value="1"/>
                                             <input type="hidden" name="errorSort" th:value="${errorSort}"/>
                                             <input type="hidden" name="errorDir" th:value="${errorDir}"/>
                                             <label class="small text-secondary" for="errorPageSize" th:text="#{label.rowsPerPage}">Rows</label>
@@ -388,7 +388,7 @@
                                     <input type="hidden" name="usageSize" th:value="${usageSize}"/>
                                     <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                     <input type="hidden" name="usageDir" th:value="${usageDir}"/>
-                                    <input type="hidden" name="errorPage" th:value="${errorPage.number + 1}"/>
+                                    <input type="hidden" name="errorPage" th:value="1"/>
                                     <input type="hidden" name="errorSort" th:value="${errorSort}"/>
                                     <input type="hidden" name="errorDir" th:value="${errorDir}"/>
                                     <label class="small text-secondary" for="errorPageSizeSingle" th:text="#{label.rowsPerPage}">Rows</label>

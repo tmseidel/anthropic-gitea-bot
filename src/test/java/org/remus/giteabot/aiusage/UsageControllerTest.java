@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -281,5 +282,26 @@ class UsageControllerTest {
                 .andExpect(status().isOk());
 
         verify(aiUsageService).findErrors(any(), any(), eq(2), anyInt(), anyString(), anyBoolean());
+    }
+
+    @Test
+    void usage_rowsPerPageForm_resetsPageToOneAndKeepsOtherTablesPage() throws Exception {
+        // Usage on page 5 (index 4) of 5 pages (81 rows), errors on page 3 (index 2) of 3 pages (60 rows).
+        when(aiUsageService.findUsage(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(4, 20), 81));
+        when(aiUsageService.findErrors(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(2, 20), 60));
+
+        String html = mockMvc.perform(get("/usage").with(user("admin").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        // The usage rows-per-page form must submit page 1 (not the current page 5): page 5 may
+        // no longer exist at a larger page size (81 rows at 100/page is a single page).
+        // The other table's page is preserved (error page 3), and vice versa (usage page 5).
+        assertTrue(html.contains("name=\"usagePage\" value=\"1\""));
+        assertTrue(html.contains("name=\"errorPage\" value=\"1\""));
+        assertTrue(html.contains("name=\"errorPage\" value=\"3\""));
+        assertTrue(html.contains("name=\"usagePage\" value=\"5\""));
     }
 }
