@@ -39,9 +39,11 @@ public class UsageController {
     public String usage(@RequestParam(required = false) String from,
                         @RequestParam(required = false) String to,
                         @RequestParam(defaultValue = "0") int usagePage,
+                        @RequestParam(defaultValue = "20") int usageSize,
                         @RequestParam(defaultValue = "timestamp") String usageSort,
                         @RequestParam(defaultValue = "desc") String usageDir,
                         @RequestParam(defaultValue = "0") int errorPage,
+                        @RequestParam(defaultValue = "20") int errorSize,
                         @RequestParam(defaultValue = "timestamp") String errorSort,
                         @RequestParam(defaultValue = "desc") String errorDir,
                         Model model) {
@@ -49,14 +51,16 @@ public class UsageController {
         Instant toInstant = parseTo(to);
 
         Page<AiUsageLog> usage = aiUsageService.findUsage(fromInstant, toInstant,
-                Math.max(0, usagePage), usageSort, "asc".equalsIgnoreCase(usageDir));
+                Math.max(0, usagePage), usageSize, usageSort, "asc".equalsIgnoreCase(usageDir));
         Page<AiErrorLog> errors = aiUsageService.findErrors(fromInstant, toInstant,
-                Math.max(0, errorPage), errorSort, "asc".equalsIgnoreCase(errorDir));
+                Math.max(0, errorPage), errorSize, errorSort, "asc".equalsIgnoreCase(errorDir));
 
         model.addAttribute("usagePage", usage);
         model.addAttribute("errorPage", errors);
         model.addAttribute("from", from != null ? from : "");
         model.addAttribute("to", to != null ? to : "");
+        model.addAttribute("usageSize", usageSize);
+        model.addAttribute("errorSize", errorSize);
         model.addAttribute("usageSort", usageSort);
         model.addAttribute("usageDir", usageDir);
         model.addAttribute("errorSort", errorSort);

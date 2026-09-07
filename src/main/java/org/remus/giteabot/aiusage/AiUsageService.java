@@ -105,19 +105,23 @@ public class AiUsageService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AiUsageLog> findUsage(Instant from, Instant to, int page,
+    public Page<AiUsageLog> findUsage(Instant from, Instant to, int page, int pageSize,
                                       String sortColumn, boolean ascending) {
         String column = USAGE_SORT_COLUMNS.contains(sortColumn) ? sortColumn : "timestamp";
         return usageRepository.findByTimestampBetween(effectiveFrom(from), effectiveTo(to),
-                PageRequest.of(page, PAGE_SIZE, sortOf(column, ascending)));
+                PageRequest.of(page, effectivePageSize(pageSize), sortOf(column, ascending)));
     }
 
     @Transactional(readOnly = true)
-    public Page<AiErrorLog> findErrors(Instant from, Instant to, int page,
+    public Page<AiErrorLog> findErrors(Instant from, Instant to, int page, int pageSize,
                                        String sortColumn, boolean ascending) {
         String column = ERROR_SORT_COLUMNS.contains(sortColumn) ? sortColumn : "timestamp";
         return errorRepository.findByTimestampBetween(effectiveFrom(from), effectiveTo(to),
-                PageRequest.of(page, PAGE_SIZE, sortOf(column, ascending)));
+                PageRequest.of(page, effectivePageSize(pageSize), sortOf(column, ascending)));
+    }
+
+    private static int effectivePageSize(int pageSize) {
+        return pageSize > 0 ? pageSize : PAGE_SIZE;
     }
 
     /**
