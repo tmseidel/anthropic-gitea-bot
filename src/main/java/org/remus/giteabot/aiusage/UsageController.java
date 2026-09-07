@@ -38,11 +38,11 @@ public class UsageController {
     @GetMapping("/usage")
     public String usage(@RequestParam(required = false) String from,
                         @RequestParam(required = false) String to,
-                        @RequestParam(defaultValue = "0") int usagePage,
+                        @RequestParam(defaultValue = "1") int usagePage,
                         @RequestParam(defaultValue = "20") int usageSize,
                         @RequestParam(defaultValue = "timestamp") String usageSort,
                         @RequestParam(defaultValue = "desc") String usageDir,
-                        @RequestParam(defaultValue = "0") int errorPage,
+                        @RequestParam(defaultValue = "1") int errorPage,
                         @RequestParam(defaultValue = "20") int errorSize,
                         @RequestParam(defaultValue = "timestamp") String errorSort,
                         @RequestParam(defaultValue = "desc") String errorDir,
@@ -50,10 +50,12 @@ public class UsageController {
         Instant fromInstant = parseFrom(from);
         Instant toInstant = parseTo(to);
 
+        // Page parameters are 1-based (the UI counts from page 1); Spring Data
+        // PageRequest is 0-based, so subtract 1 (and never go below 0).
         Page<AiUsageLog> usage = aiUsageService.findUsage(fromInstant, toInstant,
-                Math.max(0, usagePage), usageSize, usageSort, "asc".equalsIgnoreCase(usageDir));
+                Math.max(0, usagePage - 1), usageSize, usageSort, "asc".equalsIgnoreCase(usageDir));
         Page<AiErrorLog> errors = aiUsageService.findErrors(fromInstant, toInstant,
-                Math.max(0, errorPage), errorSize, errorSort, "asc".equalsIgnoreCase(errorDir));
+                Math.max(0, errorPage - 1), errorSize, errorSort, "asc".equalsIgnoreCase(errorDir));
 
         model.addAttribute("usagePage", usage);
         model.addAttribute("errorPage", errors);

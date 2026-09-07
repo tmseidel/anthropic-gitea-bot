@@ -81,10 +81,10 @@
                                     <tr>
                                         <th th:each="col : ${ {'timestamp', 'aiIntegrationName', 'sessionId', 'inputTokens', 'outputTokens', 'cacheCreationInputTokens', 'cacheReadInputTokens'} }">
                                             <a class="sort-link"
-                                               th:href="@{/usage(from=${from}, to=${to}, usagePage=0, usageSize=${usageSize},
+                                               th:href="@{/usage(from=${from}, to=${to}, usagePage=1, usageSize=${usageSize},
                                                           usageSort=${col},
                                                           usageDir=${usageSort == col && usageDir == 'desc'} ? 'asc' : 'desc',
-                                                          errorPage=${errorPage.number}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}">
+                                                          errorPage=${errorPage.number + 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}">
                                                 <span th:text="${#messages.msg('usage.column.' + col)}">Column</span>
                                                 <i th:if="${usageSort == col}"
                                                    th:class="${usageDir == 'asc'} ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'"></i>
@@ -144,37 +144,37 @@
                                 <ul class="pagination pagination-sm mb-0 flex-wrap">
                                     <li class="page-item" th:classappend="${usagePage.first} ? 'disabled'">
                                         <a class="page-link"
-                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=0, usageSize=${usageSize},
+                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=1, usageSize=${usageSize},
                                                       usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=${errorPage.number}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.first}">«</span></a>
+                                                      errorPage=${errorPage.number + 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.first}">«</span></a>
                                     </li>
                                     <li class="page-item" th:classappend="${usagePage.first} ? 'disabled'">
                                         <a class="page-link"
-                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=${usagePage.number - 1}, usageSize=${usageSize},
+                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=${usagePage.number}, usageSize=${usageSize},
                                                       usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=${errorPage.number}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.previous}">Previous</span></a>
+                                                      errorPage=${errorPage.number + 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.previous}">Previous</span></a>
                                     </li>
                                     <li th:each="p : ${#numbers.sequence(
                                         T(java.lang.Math).max(0, usagePage.number - 2),
                                         T(java.lang.Math).min(usagePage.totalPages - 1, usagePage.number + 2))}"
                                         class="page-item" th:classappend="${p == usagePage.number} ? 'active'">
                                         <a class="page-link"
-                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=${p}, usageSize=${usageSize},
+                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=${p + 1}, usageSize=${usageSize},
                                                       usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=${errorPage.number}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"
+                                                      errorPage=${errorPage.number + 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"
                                            th:text="${p + 1}">1</a>
                                     </li>
                                     <li class="page-item" th:classappend="${usagePage.last} ? 'disabled'">
                                         <a class="page-link"
-                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=${usagePage.number + 1}, usageSize=${usageSize},
+                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=${usagePage.number + 2}, usageSize=${usageSize},
                                                       usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=${errorPage.number}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.next}">Next</span></a>
+                                                      errorPage=${errorPage.number + 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.next}">Next</span></a>
                                     </li>
                                     <li class="page-item" th:classappend="${usagePage.last} ? 'disabled'">
                                         <a class="page-link"
-                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=${usagePage.totalPages - 1}, usageSize=${usageSize},
+                                           th:href="@{/usage(from=${from}, to=${to}, usagePage=${usagePage.totalPages}, usageSize=${usageSize},
                                                       usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=${errorPage.number}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.last}">»</span></a>
+                                                      errorPage=${errorPage.number + 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.last}">»</span></a>
                                     </li>
                                     <li class="page-item ms-2">
                                         <form class="d-flex align-items-center gap-1" method="get" th:action="@{/usage}">
@@ -183,7 +183,7 @@
                                             <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                             <input type="hidden" name="usageDir" th:value="${usageDir}"/>
                                             <input type="hidden" name="usageSize" th:value="${usageSize}"/>
-                                            <input type="hidden" name="errorPage" th:value="${errorPage.number}"/>
+                                            <input type="hidden" name="errorPage" th:value="${errorPage.number + 1}"/>
                                             <input type="hidden" name="errorSize" th:value="${errorSize}"/>
                                             <input type="hidden" name="errorSort" th:value="${errorSort}"/>
                                             <input type="hidden" name="errorDir" th:value="${errorDir}"/>
@@ -197,10 +197,10 @@
                                         <form class="d-flex align-items-center gap-1" method="get" th:action="@{/usage}">
                                             <input type="hidden" name="from" th:value="${from}"/>
                                             <input type="hidden" name="to" th:value="${to}"/>
-                                            <input type="hidden" name="usagePage" th:value="${usagePage.number}"/>
+                                            <input type="hidden" name="usagePage" th:value="${usagePage.number + 1}"/>
                                             <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                             <input type="hidden" name="usageDir" th:value="${usageDir}"/>
-                                            <input type="hidden" name="errorPage" th:value="${errorPage.number}"/>
+                                            <input type="hidden" name="errorPage" th:value="${errorPage.number + 1}"/>
                                             <input type="hidden" name="errorSize" th:value="${errorSize}"/>
                                             <input type="hidden" name="errorSort" th:value="${errorSort}"/>
                                             <input type="hidden" name="errorDir" th:value="${errorDir}"/>
@@ -219,10 +219,10 @@
                                 <form class="d-flex align-items-center gap-1" method="get" th:action="@{/usage}">
                                     <input type="hidden" name="from" th:value="${from}"/>
                                     <input type="hidden" name="to" th:value="${to}"/>
-                                    <input type="hidden" name="usagePage" th:value="${usagePage.number}"/>
+                                    <input type="hidden" name="usagePage" th:value="${usagePage.number + 1}"/>
                                     <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                     <input type="hidden" name="usageDir" th:value="${usageDir}"/>
-                                    <input type="hidden" name="errorPage" th:value="${errorPage.number}"/>
+                                    <input type="hidden" name="errorPage" th:value="${errorPage.number + 1}"/>
                                     <input type="hidden" name="errorSize" th:value="${errorSize}"/>
                                     <input type="hidden" name="errorSort" th:value="${errorSort}"/>
                                     <input type="hidden" name="errorDir" th:value="${errorDir}"/>
@@ -271,8 +271,8 @@
                                         <th th:each="col : ${ {'timestamp', 'aiIntegrationName', 'sessionId', 'errorMessage'} }">
                                             <a class="sort-link"
                                                th:href="@{/usage(from=${from}, to=${to},
-                                                          usagePage=${usagePage.number}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
-                                                          errorPage=0, errorSize=${errorSize}, errorSort=${col},
+                                                          usagePage=${usagePage.number + 1}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
+                                                          errorPage=1, errorSize=${errorSize}, errorSort=${col},
                                                           errorDir=${errorSort == col && errorDir == 'desc'} ? 'asc' : 'desc')}">
                                                 <span th:text="${#messages.msg('usage.column.' + col)}">Column</span>
                                                 <i th:if="${errorSort == col}"
@@ -310,14 +310,14 @@
                                     <li class="page-item" th:classappend="${errorPage.first} ? 'disabled'">
                                         <a class="page-link"
                                            th:href="@{/usage(from=${from}, to=${to},
-                                                      usagePage=${usagePage.number}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=0, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.first}">«</span></a>
+                                                      usagePage=${usagePage.number + 1}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
+                                                      errorPage=1, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.first}">«</span></a>
                                     </li>
                                     <li class="page-item" th:classappend="${errorPage.first} ? 'disabled'">
                                         <a class="page-link"
                                            th:href="@{/usage(from=${from}, to=${to},
-                                                      usagePage=${usagePage.number}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=${errorPage.number - 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.previous}">Previous</span></a>
+                                                      usagePage=${usagePage.number + 1}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
+                                                      errorPage=${errorPage.number}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.previous}">Previous</span></a>
                                     </li>
                                     <li th:each="p : ${#numbers.sequence(
                                         T(java.lang.Math).max(0, errorPage.number - 2),
@@ -325,27 +325,27 @@
                                         class="page-item" th:classappend="${p == errorPage.number} ? 'active'">
                                         <a class="page-link"
                                            th:href="@{/usage(from=${from}, to=${to},
-                                                      usagePage=${usagePage.number}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=${p}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"
+                                                      usagePage=${usagePage.number + 1}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
+                                                      errorPage=${p + 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"
                                            th:text="${p + 1}">1</a>
                                     </li>
                                     <li class="page-item" th:classappend="${errorPage.last} ? 'disabled'">
                                         <a class="page-link"
                                            th:href="@{/usage(from=${from}, to=${to},
-                                                      usagePage=${usagePage.number}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=${errorPage.number + 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.next}">Next</span></a>
+                                                      usagePage=${usagePage.number + 1}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
+                                                      errorPage=${errorPage.number + 2}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.next}">Next</span></a>
                                     </li>
                                     <li class="page-item" th:classappend="${errorPage.last} ? 'disabled'">
                                         <a class="page-link"
                                            th:href="@{/usage(from=${from}, to=${to},
-                                                      usagePage=${usagePage.number}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
-                                                      errorPage=${errorPage.totalPages - 1}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.last}">»</span></a>
+                                                      usagePage=${usagePage.number + 1}, usageSize=${usageSize}, usageSort=${usageSort}, usageDir=${usageDir},
+                                                      errorPage=${errorPage.totalPages}, errorSize=${errorSize}, errorSort=${errorSort}, errorDir=${errorDir})}"><span th:text="#{button.last}">»</span></a>
                                     </li>
                                     <li class="page-item ms-2">
                                         <form class="d-flex align-items-center gap-1" method="get" th:action="@{/usage}">
                                             <input type="hidden" name="from" th:value="${from}"/>
                                             <input type="hidden" name="to" th:value="${to}"/>
-                                            <input type="hidden" name="usagePage" th:value="${usagePage.number}"/>
+                                            <input type="hidden" name="usagePage" th:value="${usagePage.number + 1}"/>
                                             <input type="hidden" name="usageSize" th:value="${usageSize}"/>
                                             <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                             <input type="hidden" name="usageDir" th:value="${usageDir}"/>
@@ -362,11 +362,11 @@
                                         <form class="d-flex align-items-center gap-1" method="get" th:action="@{/usage}">
                                             <input type="hidden" name="from" th:value="${from}"/>
                                             <input type="hidden" name="to" th:value="${to}"/>
-                                            <input type="hidden" name="usagePage" th:value="${usagePage.number}"/>
+                                            <input type="hidden" name="usagePage" th:value="${usagePage.number + 1}"/>
                                             <input type="hidden" name="usageSize" th:value="${usageSize}"/>
                                             <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                             <input type="hidden" name="usageDir" th:value="${usageDir}"/>
-                                            <input type="hidden" name="errorPage" th:value="${errorPage.number}"/>
+                                            <input type="hidden" name="errorPage" th:value="${errorPage.number + 1}"/>
                                             <input type="hidden" name="errorSort" th:value="${errorSort}"/>
                                             <input type="hidden" name="errorDir" th:value="${errorDir}"/>
                                             <label class="small text-secondary" for="errorPageSize" th:text="#{label.rowsPerPage}">Rows</label>
@@ -384,11 +384,11 @@
                                 <form class="d-flex align-items-center gap-1" method="get" th:action="@{/usage}">
                                     <input type="hidden" name="from" th:value="${from}"/>
                                     <input type="hidden" name="to" th:value="${to}"/>
-                                    <input type="hidden" name="usagePage" th:value="${usagePage.number}"/>
+                                    <input type="hidden" name="usagePage" th:value="${usagePage.number + 1}"/>
                                     <input type="hidden" name="usageSize" th:value="${usageSize}"/>
                                     <input type="hidden" name="usageSort" th:value="${usageSort}"/>
                                     <input type="hidden" name="usageDir" th:value="${usageDir}"/>
-                                    <input type="hidden" name="errorPage" th:value="${errorPage.number}"/>
+                                    <input type="hidden" name="errorPage" th:value="${errorPage.number + 1}"/>
                                     <input type="hidden" name="errorSort" th:value="${errorSort}"/>
                                     <input type="hidden" name="errorDir" th:value="${errorDir}"/>
                                     <label class="small text-secondary" for="errorPageSizeSingle" th:text="#{label.rowsPerPage}">Rows</label>

@@ -225,4 +225,61 @@ class UsageControllerTest {
                 .andExpect(content().string(containsString("id=\"usageJumpTo\"")))
                 .andExpect(content().string(containsString("id=\"usagePageSize\"")));
     }
+
+    @Test
+    void usage_jumpToPage_convertsOneBasedToZeroBasedIndex() throws Exception {
+        when(aiUsageService.findUsage(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(2, 20), 100));
+        when(aiUsageService.findErrors(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
+
+        // Jump form submits a 1-based page number; the service must receive the
+        // zero-based index (page 3 -> index 2).
+        mockMvc.perform(get("/usage").param("usagePage", "3").with(user("admin").roles("ADMIN")))
+                .andExpect(status().isOk());
+
+        verify(aiUsageService).findUsage(any(), any(), eq(2), anyInt(), anyString(), anyBoolean());
+    }
+
+    @Test
+    void usage_firstPage_convertsToZeroBasedIndex() throws Exception {
+        when(aiUsageService.findUsage(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 100));
+        when(aiUsageService.findErrors(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
+
+        // Entering page 1 must show the first page (index 0), not the second.
+        mockMvc.perform(get("/usage").param("usagePage", "1").with(user("admin").roles("ADMIN")))
+                .andExpect(status().isOk());
+
+        verify(aiUsageService).findUsage(any(), any(), eq(0), anyInt(), anyString(), anyBoolean());
+    }
+
+    @Test
+    void usage_defaultPage_isFirstPage() throws Exception {
+        when(aiUsageService.findUsage(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 100));
+        when(aiUsageService.findErrors(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
+
+        // No page parameter at all: default is 1 (first page) -> index 0.
+        mockMvc.perform(get("/usage").with(user("admin").roles("ADMIN")))
+                .andExpect(status().isOk());
+
+        verify(aiUsageService).findUsage(any(), any(), eq(0), anyInt(), anyString(), anyBoolean());
+    }
+
+    @Test
+    void usage_errorJumpToPage_convertsOneBasedToZeroBasedIndex() throws Exception {
+        when(aiUsageService.findUsage(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
+        when(aiUsageService.findErrors(any(), any(), anyInt(), anyInt(), anyString(), anyBoolean()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(2, 20), 100));
+
+        // Jump in the error table: page 3 -> zero-based index 2.
+        mockMvc.perform(get("/usage").param("errorPage", "3").with(user("admin").roles("ADMIN")))
+                .andExpect(status().isOk());
+
+        verify(aiUsageService).findErrors(any(), any(), eq(2), anyInt(), anyString(), anyBoolean());
+    }
 }
