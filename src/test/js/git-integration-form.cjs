@@ -30,6 +30,13 @@ vm.runInNewContext(script, { document: {
     getElementById: get,
     addEventListener(event, handler) { handler(); }
 } });
+get('sshPrivateKey').value = 'replacement-private-key';
+get('sshPrivateKey').listeners.input();
+assert.equal(get('transport').value, 'SSH');
+assert.equal(get('clearSshCredentials').value, 'false');
+assert.equal(get('sshKnownHosts').required, false);
+assert.equal(get('sshPrivateKey').required, false);
+assert.equal(get('token').required, false);
 get('url').value = 'https://new.example.com';
 get('url').listeners.input();
 assert.equal(get('transport').value, 'SSH');

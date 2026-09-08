@@ -197,7 +197,6 @@
                 const clearPending = document.getElementById('clearSshCredentials').value === 'true';
                 const tokenClearPending = document.getElementById('clearToken').value === 'true';
                 const visible = providerType === 'GITEA' && transport === 'SSH';
-                const replacingPrivateKey = privateKeyInput.value.trim() !== '';
                 const endpointChanged = isEditMode && (providerType !== originalProviderType
                     || document.getElementById('url').value !== originalUrl);
 
@@ -209,7 +208,7 @@
                 knownHostsInput.disabled = !visible;
                 privateKeyInput.required = visible && (!isEditMode || !hasStoredSshPrivateKey || clearPending);
                 knownHostsInput.required = visible
-                    && (!isEditMode || !hasStoredSshKnownHosts || clearPending || replacingPrivateKey || endpointChanged);
+                    && (!isEditMode || !hasStoredSshKnownHosts || clearPending || endpointChanged);
                 document.getElementById('token').required = !isEditMode
                     || endpointChanged || visible && (!hasStoredToken || tokenClearPending);
             }

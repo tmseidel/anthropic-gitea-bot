@@ -18,8 +18,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -27,6 +30,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -175,6 +179,50 @@ class GitIntegrationControllerTest {
                                 && "gitea.example.com ssh-ed25519 host-key".equals(integration.getSshKnownHosts())
                 ),
                 eq(false), eq(false));
+    }
+
+    @Test
+    void save_keyOnlyRotation_preservesStoredKnownHosts() throws Exception {
+        GitIntegrationRepository repository = mock(GitIntegrationRepository.class);
+        EncryptionService encryption = mock(EncryptionService.class);
+        GitIntegrationService service = new GitIntegrationService(repository, encryption);
+        GitIntegration existing = new GitIntegration();
+        existing.setId(7L);
+        existing.setUrl("https://gitea.example.com");
+        existing.setTransport(GitTransport.SSH);
+        existing.setToken("stored-token");
+        existing.setSshPrivateKey("stored-private-key");
+        existing.setSshKnownHosts("gitea.example.com ssh-ed25519 trusted-host-key");
+        when(repository.findById(7L)).thenReturn(Optional.of(existing));
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(encryption.isEncryptionEnabled()).thenReturn(true);
+        when(encryption.encrypt("replacement-private-key")).thenReturn("encrypted-replacement-key");
+        // Exercise the real credential merge behind the MVC service mock.
+        when(gitIntegrationService.save(any(), anyBoolean(), anyBoolean())).thenAnswer(invocation ->
+                service.save(invocation.getArgument(0), invocation.getArgument(1), invocation.getArgument(2)));
+
+        mockMvc.perform(post("/git-integrations/save")
+                        .with(user("admin").roles("ADMIN"))
+                        .with(csrf())
+                        .param("id", "7")
+                        .param("name", "My Gitea")
+                        .param("providerType", "GITEA")
+                        .param("url", "https://gitea.example.com")
+                        .param("transport", "SSH")
+                        .param("token", "")
+                        .param("sshPrivateKey", "replacement-private-key")
+                        .param("sshKnownHosts", "")
+                        .param("postReviewAction", "NONE"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/git-integrations"))
+                .andExpect(flash().attributeExists("success"))
+                .andExpect(flash().attributeCount(1));
+
+        verify(repository).save(argThat(integration ->
+                GitTransport.SSH.equals(integration.getTransport())
+                        && "encrypted-replacement-key".equals(integration.getSshPrivateKey())
+                        && "gitea.example.com ssh-ed25519 trusted-host-key".equals(integration.getSshKnownHosts())
+                        && "stored-token".equals(integration.getToken())));
     }
 
     @Test
