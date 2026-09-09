@@ -637,7 +637,7 @@ The migration that adds .NET validation support overwrites the **Default** codin
 
 ### Data Encryption
 
-When `APP_ENCRYPTION_KEY` is configured, sensitive data is encrypted at rest using AES-256-GCM. Without it, API keys and Git tokens are stored in plain text. Set a stable, secure value before entering production credentials.
+When `APP_ENCRYPTION_KEY` is configured, sensitive data is encrypted at rest using AES-256-GCM. Without it, API keys and Git tokens are stored in plain text, and SSH private keys cannot be stored. Set a stable, secure value before entering production credentials.
 
 ### Authentication
 
@@ -660,7 +660,7 @@ The whitelist is the recommended defence for bots installed on **public reposito
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `APP_ENCRYPTION_KEY` | *(none)* | Encryption key for sensitive data. Without it, credentials use plain-text storage. |
+| `APP_ENCRYPTION_KEY` | *(none)* | Encryption key for sensitive data. Without it, credentials use plain-text storage and SSH private keys are rejected. |
 | `APP_PUBLIC_URL` | `http://localhost:8080` | Public base URL of the bot instance. Used as callback URL for CI deployment workflows and preview environments. Set to the externally reachable URL when running behind a reverse proxy or in CI. |
 | `DATABASE_URL` | H2 in-memory | Database JDBC URL |
 | `DATABASE_USERNAME` | `sa` | Database username |
